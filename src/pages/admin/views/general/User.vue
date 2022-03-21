@@ -99,6 +99,11 @@
               {{row[2]}}
             </template>
           </el-table-column>
+          <el-table-column label="RealName">
+            <template slot-scope="{row}">
+              {{row[3]}}
+            </template>
+          </el-table-column>
         </el-table>
         <div class="panel-options">
           <el-button type="primary" size="small"
@@ -231,9 +236,7 @@
           <el-col :span="8">
             <el-form-item :label="$t('m.Is_Disabled')">
               <el-switch
-                v-model="user.is_disabled"
-                active-text=""
-                inactive-text="">
+                v-model="user.is_disabled">
               </el-switch>
             </el-form-item>
           </el-col>
@@ -326,7 +329,7 @@
         })
       },
       deleteUsers (ids) {
-        this.$confirm('Sure to delete the user?', 'confirm', {
+        this.$confirm('Sure to delete the user? The associated resources created by this user will be deleted as well, like problem, contest, announcement, etc.', 'confirm', {
           type: 'warning'
         }).then(() => {
           api.deleteUsers(ids.join(',')).then(res => {
@@ -364,7 +367,7 @@
         papa.parse(file, {
           complete: (results) => {
             let data = results.data.filter(user => {
-              return user[0] && user[1] && user[2]
+              return user[0] && user[1] && user[2] && user[3]
             })
             let delta = results.data.length - data.length
             if (delta > 0) {

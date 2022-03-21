@@ -11,22 +11,23 @@
                   <Icon type="arrow-down-b"></Icon>
                 </span>
                 <Dropdown-menu slot="list">
-                  <Dropdown-item name="">전체</Dropdown-item>
+                  <Dropdown-item name="">{{$t('m.All')}}</Dropdown-item>
                   <Dropdown-item v-for="status in Object.keys(JUDGE_STATUS)" :key="status" :name="status">
-                    {{JUDGE_STATUS[status].name}}
+                    {{$t('m.' + JUDGE_STATUS[status].name.replace(/ /g, "_"))}}
                   </Dropdown-item>
                 </Dropdown-menu>
               </Dropdown>
             </li>
-              
+
+
             <li>
               <i-switch size="large" v-model="formFilter.myself" @on-change="handleQueryChange">
-                <span slot="open">내 문제</span>
-                <span slot="close">전체</span>
+                <span slot="open">{{$t('m.Mine')}}</span>
+                <span slot="close">{{$t('m.All')}}</span>
               </i-switch>
             </li>
             <li>
-              <Input v-model="formFilter.username" placeholder="Search Author" @on-enter="handleQueryChange"/>
+              <Input v-model="formFilter.username" :placeholder="$t('m.Search_Author')" @on-enter="handleQueryChange"/>
             </li>
 
             <li>
@@ -63,14 +64,14 @@
         },
         columns: [
           {
-            title: '날짜',
+            title: this.$i18n.t('m.When'),
             align: 'center',
             render: (h, params) => {
               return h('span', time.utcToLocal(params.row.create_time))
             }
           },
           {
-            title: '번호',
+            title: this.$i18n.t('m.ID'),
             align: 'center',
             render: (h, params) => {
               if (params.row.show_link) {
@@ -91,18 +92,18 @@
             }
           },
           {
-            title: '상태',
+            title: this.$i18n.t('m.Status'),
             align: 'center',
             render: (h, params) => {
               return h('Tag', {
                 props: {
                   color: JUDGE_STATUS[params.row.result].color
                 }
-              }, JUDGE_STATUS[params.row.result].name)
+              }, this.$i18n.t('m.' + JUDGE_STATUS[params.row.result].name.replace(/ /g, '_')))
             }
           },
           {
-            title: '문제',
+            title: this.$i18n.t('m.Problem'),
             align: 'center',
             render: (h, params) => {
               return h('span',
@@ -129,26 +130,26 @@
             }
           },
           {
-            title: '시간',
+            title: this.$i18n.t('m.Time'),
             align: 'center',
             render: (h, params) => {
               return h('span', utils.submissionTimeFormat(params.row.statistic_info.time_cost))
             }
           },
           {
-            title: '메모리',
+            title: this.$i18n.t('m.Memory'),
             align: 'center',
             render: (h, params) => {
               return h('span', utils.submissionMemoryFormat(params.row.statistic_info.memory_cost))
             }
           },
           {
-            title: '언어',
+            title: this.$i18n.t('m.Language'),
             align: 'center',
             key: 'language'
           },
           {
-            title: '만든이',
+            title: this.$i18n.t('m.Author'),
             align: 'center',
             render: (h, params) => {
               return h('a', {
@@ -250,7 +251,7 @@
           return
         }
         const judgeColumn = {
-          title: 'Option',
+          title: this.$i18n.t('m.Option'),
           fixed: 'right',
           align: 'center',
           width: 90,
@@ -266,7 +267,7 @@
                   this.handleRejudge(params.row.id, params.index)
                 }
               }
-            }, 'Rejudge')
+            }, this.$i18n.t('m.Rejudge'))
           }
         }
         this.columns.push(judgeColumn)
@@ -296,15 +297,15 @@
       ...mapGetters(['isAuthenticated', 'user']),
       title () {
         if (!this.contestID) {
-          return '상태'
+          return this.$i18n.t('m.Status')
         } else if (this.problemID) {
-          return '문제 제출'
+          return this.$i18n.t('m.Problem_Submissions')
         } else {
-          return '제출'
+          return this.$i18n.t('m.Submissions')
         }
       },
       status () {
-        return this.formFilter.result === '' ? '상태' : JUDGE_STATUS[this.formFilter.result].name
+        return this.formFilter.result === '' ? this.$i18n.t('m.Status') : this.$i18n.t('m.' + JUDGE_STATUS[this.formFilter.result].name.replace(/ /g, '_'))
       },
       rejudgeColumnVisible () {
         return !this.contestID && this.user.admin_type === USER_TYPE.SUPER_ADMIN

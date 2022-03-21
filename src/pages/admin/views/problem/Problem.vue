@@ -6,7 +6,7 @@
         <el-row :gutter="20">
           <el-col :span="6">
             <el-form-item prop="_id" :label="$t('m.Display_ID')"
-                          :required="this.routeName === 'create-contest-problem' || this.routeName === 'edit-contet-problem'">
+                          :required="this.routeName === 'create-contest-problem' || this.routeName === 'edit-contest-problem'">
               <el-input :placeholder="$t('m.Display_ID')" v-model="problem._id"></el-input>
             </el-form-item>
           </el-col>
@@ -37,27 +37,27 @@
         </el-row>
         <el-row :gutter="20">
           <el-col :span="8">
-            <el-form-item :label="$t('m.Time_Limit')" required>
+            <el-form-item :label="$t('m.Time_Limit') + ' (ms)' " required>
               <el-input type="Number" :placeholder="$t('m.Time_Limit')" v-model="problem.time_limit"></el-input>
             </el-form-item>
           </el-col>
           <el-col :span="8">
-            <el-form-item :label="$t('m.Memory_limit')" required>
+            <el-form-item :label="$t('m.Memory_limit') + ' (MB)' " required>
               <el-input type="Number" :placeholder="$t('m.Memory_limit')" v-model="problem.memory_limit"></el-input>
             </el-form-item>
           </el-col>
           <el-col :span="8">
             <el-form-item :label="$t('m.Difficulty')">
               <el-select class="difficulty-select" size="small" :placeholder="$t('m.Difficulty')" v-model="problem.difficulty">
-                <el-option label="Low" value="Low"></el-option>
-                <el-option label="Mid" value="Mid"></el-option>
-                <el-option label="High" value="High"></el-option>
+                <el-option :label="$t('m.Low')" value="Low"></el-option>
+                <el-option :label="$t('m.Mid')" value="Mid"></el-option>
+                <el-option :label="$t('m.High')" value="High"></el-option>
               </el-select>
             </el-form-item>
           </el-col>
         </el-row>
         <el-row :gutter="20">
-          <el-col :span="6">
+          <el-col :span="4">
             <el-form-item :label="$t('m.Visible')">
               <el-switch
                 v-model="problem.visible"
@@ -66,8 +66,17 @@
               </el-switch>
             </el-form-item>
           </el-col>
+          <el-col :span="4">
+            <el-form-item :label="$t('m.ShareSubmission')">
+              <el-switch
+                v-model="problem.share_submission"
+                active-text=""
+                inactive-text="">
+              </el-switch>
+            </el-form-item>
+          </el-col>
           <el-col :span="8">
-            <el-form-item label="Tag" :error="error.tags" required>
+            <el-form-item :label="$t('m.Tag')" :error="error.tags" required>
               <span class="tags">
                 <el-tag
                   v-for="tag in problem.tags"
@@ -82,14 +91,14 @@
                 v-if="inputVisible"
                 size="mini"
                 class="input-new-tag"
+                popper-class="problem-tag-poper"
                 v-model="tagInput"
                 :trigger-on-focus="false"
                 @keyup.enter.native="addTag"
-                @blur="addTag"
                 @select="addTag"
                 :fetch-suggestions="querySearch">
               </el-autocomplete>
-              <el-button class="button-new-tag" v-else size="small" @click="inputVisible = true">+ New Tag</el-button>
+              <el-button class="button-new-tag" v-else size="small" @click="inputVisible = true">+ {{$t('m.New_Tag')}}</el-button>
             </el-form-item>
           </el-col>
           <el-col :span="8">
@@ -134,13 +143,13 @@
             </Accordion>
           </el-form-item>
         </div>
-        <el-form-item style="margin-top: 20px" :label="$t('m.Hint')">
-          <Simditor v-model="problem.hint" placeholder=""></Simditor>
-        </el-form-item>
         <div class="add-sample-btn">
           <button type="button" class="add-samples" @click="addSample()"><i class="el-icon-plus"></i>{{$t('m.Add_Sample')}}
           </button>
         </div>
+        <el-form-item style="margin-top: 20px" :label="$t('m.Hint')">
+          <Simditor v-model="problem.hint" placeholder=""></Simditor>
+        </el-form-item>
         <el-form-item :label="$t('m.Code_Template')">
           <el-row>
             <el-col :span="24" v-for="(v, k) in template" :key="'template'+k">
@@ -177,7 +186,7 @@
           </Accordion>
         </el-form-item>
         <el-row :gutter="20">
-          <el-col :span="6">
+          <el-col :span="4">
             <el-form-item :label="$t('m.Type')">
               <el-radio-group v-model="problem.rule_type" :disabled="disableRuleType">
                 <el-radio label="ACM">ACM</el-radio>
@@ -185,7 +194,7 @@
               </el-radio-group>
             </el-form-item>
           </el-col>
-          <el-col :span="12">
+          <el-col :span="6">
             <el-form-item :label="$t('m.TestCase')" :error="error.testcase">
               <el-upload
                 action="/api/admin/test_case"
@@ -196,6 +205,26 @@
                 :on-error="uploadFailed">
                 <el-button size="small" type="primary" icon="el-icon-fa-upload">Choose File</el-button>
               </el-upload>
+            </el-form-item>
+          </el-col>
+
+          <el-col :span="6">
+            <el-form-item :label="$t('m.IOMode')">
+              <el-radio-group v-model="problem.io_mode.io_mode">
+                <el-radio label="Standard IO">Standard IO</el-radio>
+                <el-radio label="File IO">File IO</el-radio>
+              </el-radio-group>
+            </el-form-item>
+          </el-col>
+
+          <el-col :span="4" v-if="problem.io_mode.io_mode == 'File IO'">
+            <el-form-item :label="$t('m.InputFileName')" required>
+              <el-input type="text" v-model="problem.io_mode.input"></el-input>
+            </el-form-item>
+          </el-col>
+          <el-col :span="4" v-if="problem.io_mode.io_mode == 'File IO'">
+            <el-form-item :label="$t('m.OutputFileName')" required>
+              <el-input type="text" v-model="problem.io_mode.output"></el-input>
             </el-form-item>
           </el-col>
 
@@ -261,10 +290,12 @@
         mode: '',
         contest: {},
         problem: {
-          languages: []
+          languages: [],
+          io_mode: {'io_mode': 'Standard IO', 'input': 'input.txt', 'output': 'output.txt'}
         },
         reProblem: {
-          languages: []
+          languages: [],
+          io_mode: {'io_mode': 'Standard IO', 'input': 'input.txt', 'output': 'output.txt'}
         },
         testCaseUploaded: false,
         allLanguage: {},
@@ -301,6 +332,7 @@
           memory_limit: 256,
           difficulty: 'Low',
           visible: true,
+          share_submission: false,
           tags: [],
           languages: [],
           template: {},
@@ -313,7 +345,8 @@
           test_case_score: [],
           rule_type: 'ACM',
           hint: '',
-          source: ''
+          source: '',
+          io_mode: {'io_mode': 'Standard IO', 'input': 'input.txt', 'output': 'output.txt'}
         }
         let contestID = this.$route.params.contestId
         if (contestID) {
@@ -332,7 +365,7 @@
 
         // get problem after getting languages list to avoid find undefined value in `watch problem.languages`
         if (this.mode === 'edit') {
-          this.title = 'Edit Problem'
+          this.title = this.$i18n.t('m.Edit_Problem')
           let funcName = {'edit-problem': 'getProblem', 'edit-contest-problem': 'getContestProblem'}[this.routeName]
           api[funcName](this.$route.params.problemId).then(problemRes => {
             let data = problemRes.data.data
@@ -344,7 +377,7 @@
             this.testCaseUploaded = true
           })
         } else {
-          this.title = 'Add Problem'
+          this.title = this.$i18n.t('m.Add_Problem')
           for (let item of allLanguage.languages) {
             this.problem.languages.push(item.name)
           }
@@ -399,7 +432,7 @@
         }
       },
       querySearch (queryString, cb) {
-        api.getProblemTagList().then(res => {
+        api.getProblemTagList({ keyword: queryString }).then(res => {
           let tagList = []
           for (let tag of res.data.data) {
             tagList.push({value: tag.name})
@@ -438,7 +471,7 @@
         let fileList = response.data.info
         for (let file of fileList) {
           file.score = (100 / fileList.length).toFixed(0)
-          if (this.problem.spj) {
+          if (!file.output_name && this.problem.spj) {
             file.output_name = '-'
           }
         }
@@ -607,6 +640,9 @@
 </style>
 
 <style>
+  .problem-tag-poper {
+    width: 200px !important;
+  }
   .dialog-compile-error {
     width: auto;
     max-width: 80%;

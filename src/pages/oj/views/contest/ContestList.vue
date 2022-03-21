@@ -2,31 +2,31 @@
   <Row type="flex">
     <Col :span="24">
     <Panel id="contest-card" shadow>
-      <div slot="title">{{query.rule_type === '' ? '전체' : query.rule_type}} 대회</div>
+      <div slot="title">{{query.rule_type === '' ? this.$i18n.t('m.All') : query.rule_type}} {{$t('m.Contests')}}</div>
       <div slot="extra">
         <ul class="filter">
           <li>
             <Dropdown @on-click="onRuleChange">
-              <span>{{query.rule_type === '' ? '규칙' : query.rule_type}}
+              <span>{{query.rule_type === '' ? this.$i18n.t('m.Rule') : this.$i18n.t('m.' + query.rule_type)}}
                 <Icon type="arrow-down-b"></Icon>
               </span>
               <Dropdown-menu slot="list">
-                <Dropdown-item name="">전체</Dropdown-item>
-                <Dropdown-item name="OI">OI</Dropdown-item>
-                <Dropdown-item name="ACM">ACM</Dropdown-item>
+                <Dropdown-item name="">{{$t('m.All')}}</Dropdown-item>
+                <Dropdown-item name="OI">{{$t('m.OI')}}</Dropdown-item>
+                <Dropdown-item name="ACM">{{$t('m.ACM')}}</Dropdown-item>
               </Dropdown-menu>
             </Dropdown>
           </li>
           <li>
             <Dropdown @on-click="onStatusChange">
-              <span>{{query.status === '' ? '상태' : CONTEST_STATUS_REVERSE[query.status].name}}
+              <span>{{query.status === '' ? this.$i18n.t('m.Status') : this.$i18n.t('m.' + CONTEST_STATUS_REVERSE[query.status].name.replace(/ /g,"_"))}}
                 <Icon type="arrow-down-b"></Icon>
               </span>
               <Dropdown-menu slot="list">
-                <Dropdown-item name="">전체</Dropdown-item>
-                <Dropdown-item name="0">진행중</Dropdown-item>
-                <Dropdown-item name="1">예정</Dropdown-item>
-                <Dropdown-item name="-1">종료</Dropdown-item>
+                <Dropdown-item name="">{{$t('m.All')}}</Dropdown-item>
+                <Dropdown-item name="0">{{$t('m.Underway')}}</Dropdown-item>
+                <Dropdown-item name="1">{{$t('m.Not_Started')}}</Dropdown-item>
+                <Dropdown-item name="-1">{{$t('m.Ended')}}</Dropdown-item>
               </Dropdown-menu>
             </Dropdown>
           </li>
@@ -36,7 +36,7 @@
           </li>
         </ul>
       </div>
-      <p id="no-contest" v-if="contests.length == 0">대회가 없습니다.</p>
+      <p id="no-contest" v-if="contests.length == 0">{{$t('m.No_contest')}}</p>
       <ol id="contest-list">
         <li v-for="contest in contests" :key="contest.title">
           <Row type="flex" justify="space-between" align="middle">
@@ -67,13 +67,13 @@
             </ul>
             </Col>
             <Col :span="4" style="text-align: center">
-            <Tag type="dot" :color="CONTEST_STATUS_REVERSE[contest.status].color">{{CONTEST_STATUS_REVERSE[contest.status].name}}</Tag>
+            <Tag type="dot" :color="CONTEST_STATUS_REVERSE[contest.status].color">{{$t('m.' + CONTEST_STATUS_REVERSE[contest.status].name.replace(/ /g, "_"))}}</Tag>
             </Col>
           </Row>
         </li>
       </ol>
     </Panel>
-    <Pagination :total="total" :pageSize="limit" @on-change="getContestList" :current.sync="page"></Pagination>
+    <Pagination :total="total" :page-size.sync="limit" @on-change="changeRoute" :current.sync="page" :show-sizer="true" @on-page-size-change="changeRoute"></Pagination>
     </Col>
   </Row>
 
@@ -87,7 +87,7 @@
   import time from '@/utils/time'
   import { CONTEST_STATUS_REVERSE, CONTEST_TYPE } from '@/utils/constants'
 
-  const limit = 8
+  const limit = 10
 
   export default {
     name: 'contest-list',
@@ -128,7 +128,8 @@
         this.query.rule_type = route.rule_type || ''
         this.query.keyword = route.keyword || ''
         this.page = parseInt(route.page) || 1
-        this.getContestList()
+        this.limit = parseInt(route.limit) || 10
+        this.getContestList(this.page)
       },
       getContestList (page = 1) {
         let offset = (page - 1) * this.limit
@@ -140,6 +141,8 @@
       changeRoute () {
         let query = Object.assign({}, this.query)
         query.page = this.page
+        query.limit = this.limit
+
         this.$router.push({
           name: 'contest-list',
           query: utils.filterEmptyValue(query)
@@ -158,7 +161,7 @@
       goContest (contest) {
         this.cur_contest_id = contest.id
         if (contest.contest_type !== CONTEST_TYPE.PUBLIC && !this.isAuthenticated) {
-          this.$error('Please login first.')
+          this.$error(this.$i18n.t('m.Please_login_first'))
           this.$store.dispatch('changeModalStatus', {visible: true})
         } else {
           this.$router.push({name: 'contest-details', params: {contestID: contest.id}})

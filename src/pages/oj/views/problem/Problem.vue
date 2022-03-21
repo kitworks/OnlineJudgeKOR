@@ -8,10 +8,10 @@
           <p class="title">{{$t('m.Description')}}</p>
           <p class="content" v-html=problem.description></p>
           <!-- {{$t('m.music')}} -->
-          <p class="title">{{$t('m.Input')}}</p>
+          <p class="title">{{$t('m.Input')}} <span v-if="problem.io_mode.io_mode=='File IO'">({{$t('m.FromFile')}}: {{ problem.io_mode.input }})</span></p>
           <p class="content" v-html=problem.input_description></p>
 
-          <p class="title">{{$t('m.Output')}}</p>
+          <p class="title">{{$t('m.Output')}} <span v-if="problem.io_mode.io_mode=='File IO'">({{$t('m.ToFile')}}: {{ problem.io_mode.output }})</span></p>
           <p class="content" v-html=problem.output_description></p>
 
           <div v-for="(sample, index) of problem.samples" :key="index">
@@ -63,21 +63,21 @@
               <template v-if="!this.contestID || (this.contestID && OIContestRealTimePermission)">
                 <span>{{$t('m.Status')}}</span>
                 <Tag type="dot" :color="submissionStatus.color" @click.native="handleRoute('/status/'+submissionId)">
-                  {{submissionStatus.text}}
+                  {{$t('m.' + submissionStatus.text.replace(/ /g, "_"))}}
                 </Tag>
               </template>
               <template v-else-if="this.contestID && !OIContestRealTimePermission">
-                <Alert type="success" show-icon>성공적으로 제출되었습니다.</Alert>
+                <Alert type="success" show-icon>{{$t('m.Submitted_successfully')}}</Alert>
               </template>
             </div>
             <div v-else-if="problem.my_status === 0">
-              <Alert type="success" show-icon>이미 푼 문제입니다.</Alert>
+              <Alert type="success" show-icon>{{$t('m.You_have_solved_the_problem')}}</Alert>
             </div>
             <div v-else-if="this.contestID && !OIContestRealTimePermission && submissionExists">
-              <Alert type="success" show-icon>풀이를 제출했습니다.</Alert>
+              <Alert type="success" show-icon>{{$t('m.You_have_submitted_a_solution')}}</Alert>
             </div>
             <div v-if="contestEnded">
-              <Alert type="warning" show-icon>대회가 종료되었습니다.</Alert>
+              <Alert type="warning" show-icon>{{$t('m.Contest_has_ended')}}</Alert>
             </div>
           </Col>
 
@@ -93,9 +93,8 @@
             <Button type="warning" icon="edit" :loading="submitting" @click="submitCode"
                     :disabled="problemSubmitDisabled || submitted"
                     class="fl-right">
-              <span v-if="submitting">제출중</span>
-              <span v-else-if="submitted">제출완료</span>
-              <span v-else>제출</span>
+              <span v-if="submitting">{{$t('m.Submitting')}}</span>
+              <span v-else>{{$t('m.Submit')}}</span>
             </Button>
           </Col>
         </Row>
@@ -107,29 +106,29 @@
         <template v-if="this.contestID">
           <VerticalMenu-item :route="{name: 'contest-problem-list', params: {contestID: contestID}}">
             <Icon type="ios-photos"></Icon>
-            문제
+            {{$t('m.Problems')}}
           </VerticalMenu-item>
 
           <VerticalMenu-item :route="{name: 'contest-announcement-list', params: {contestID: contestID}}">
             <Icon type="chatbubble-working"></Icon>
-            공지사항
+            {{$t('m.Announcements')}}
           </VerticalMenu-item>
         </template>
 
         <VerticalMenu-item v-if="!this.contestID || OIContestRealTimePermission" :route="submissionRoute">
           <Icon type="navicon-round"></Icon>
-          제출 현황
+           {{$t('m.Submissions')}}
         </VerticalMenu-item>
 
         <template v-if="this.contestID">
           <VerticalMenu-item v-if="!this.contestID || OIContestRealTimePermission"
                              :route="{name: 'contest-rank', params: {contestID: contestID}}">
             <Icon type="stats-bars"></Icon>
-            랭킹
+            {{$t('m.Rankings')}}
           </VerticalMenu-item>
           <VerticalMenu-item :route="{name: 'contest-details', params: {contestID: contestID}}">
             <Icon type="home"></Icon>
-            대회
+            {{$t('m.View_Contest')}}
           </VerticalMenu-item>
         </template>
       </VerticalMenu>
@@ -140,7 +139,7 @@
           <span class="card-title">{{$t('m.Information')}}</span>
         </div>
         <ul>
-          <li><p>번호</p>
+          <li><p>ID</p>
             <p>{{problem._id}}</p></li>
           <li>
             <p>{{$t('m.Time_Limit')}}</p>
@@ -149,11 +148,16 @@
             <p>{{$t('m.Memory_Limit')}}</p>
             <p>{{problem.memory_limit}}MB</p></li>
           <li>
+          <li>
+            <p>{{$t('m.IOMode')}}</p>
+            <p>{{problem.io_mode.io_mode}}</p>
+          </li>
+          <li>
             <p>{{$t('m.Created')}}</p>
             <p>{{problem.created_by.username}}</p></li>
           <li v-if="problem.difficulty">
             <p>{{$t('m.Level')}}</p>
-            <p>{{problem.difficulty}}</p></li>
+            <p>{{$t('m.' + problem.difficulty)}}</p></li>
           <li v-if="problem.total_score">
             <p>{{$t('m.Score')}}</p>
             <p>{{problem.total_score}}</p>
@@ -162,7 +166,7 @@
             <p>{{$t('m.Tags')}}</p>
             <p>
               <Poptip trigger="hover" placement="left-end">
-                <a>Show</a>
+                <a>{{$t('m.Show')}}</a>
                 <div slot="content">
                   <Tag v-for="tag in problem.tags" :key="tag">{{tag}}</Tag>
                 </div>
@@ -175,8 +179,8 @@
       <Card id="pieChart" :padding="0" v-if="!this.contestID || OIContestRealTimePermission">
         <div slot="title">
           <Icon type="ios-analytics"></Icon>
-          <span class="card-title">통계</span>
-          <Button type="ghost" size="small" id="detail" @click="graphVisible = !graphVisible">자세히</Button>
+          <span class="card-title">{{$t('m.Statistic')}}</span>
+          <Button type="ghost" size="small" id="detail" @click="graphVisible = !graphVisible">Details</Button>
         </div>
         <div class="echarts">
           <ECharts :options="pie"></ECharts>
@@ -189,7 +193,7 @@
         <ECharts :options="largePie" :initOptions="largePieInitOpts"></ECharts>
       </div>
       <div slot="footer">
-        <Button type="ghost" @click="graphVisible=false">닫기</Button>
+        <Button type="ghost" @click="graphVisible=false">{{$t('m.Close')}}</Button>
       </div>
     </Modal>
   </div>
@@ -243,7 +247,8 @@
           created_by: {
             username: ''
           },
-          tags: []
+          tags: [],
+          io_mode: {'io_mode': 'Standard IO'}
         },
         pie: pie,
         largePie: largePie,
@@ -286,7 +291,9 @@
           })
           problem.languages = problem.languages.sort()
           this.problem = problem
-          this.changePie(problem)
+          if (problem.statistic_info) {
+            this.changePie(problem)
+          }
 
           // 在beforeRouteEnter中修改了, 说明本地有code，无需加载template
           if (this.code !== '') {
@@ -354,11 +361,13 @@
       },
       onResetToTemplate () {
         this.$Modal.confirm({
-          content: 'Are you sure you want to reset your code?',
+          content: this.$i18n.t('m.Are_you_sure_you_want_to_reset_your_code'),
           onOk: () => {
             let template = this.problem.template
             if (template && template[this.language]) {
               this.code = template[this.language]
+            } else {
+              this.code = ''
             }
           }
         })
@@ -375,6 +384,7 @@
             this.result = res.data.data
             if (Object.keys(res.data.data.statistic_info).length !== 0) {
               this.submitting = false
+              this.submitted = false
               clearTimeout(this.refreshStatus)
               this.init()
             } else {
@@ -389,7 +399,7 @@
       },
       submitCode () {
         if (this.code.trim() === '') {
-          this.$error('Code can not be empty')
+          this.$error(this.$i18n.t('m.Code_can_not_be_empty'))
           return
         }
         this.submissionId = ''
@@ -407,18 +417,18 @@
         const submitFunc = (data, detailsVisible) => {
           this.statusVisible = true
           api.submitCode(data).then(res => {
-            this.submitted = true
             this.submissionId = res.data.data && res.data.data.submission_id
             // 定时检查状态
             this.submitting = false
             this.submissionExists = true
             if (!detailsVisible) {
               this.$Modal.success({
-                title: 'Success',
-                content: 'Submit code successfully'
+                title: this.$i18n.t('m.Success'),
+                content: this.$i18n.t('m.Submit_code_successfully')
               })
               return
             }
+            this.submitted = true
             this.checkSubmissionStatus()
           }, res => {
             this.getCaptchaSrc()
@@ -434,7 +444,7 @@
           if (this.submissionExists) {
             this.$Modal.confirm({
               title: '',
-              content: '<h3>You have submission in this problem, sure to cover it?<h3>',
+              content: '<h3>' + this.$i18n.t('m.You_have_submission_in_this_problem_sure_to_cover_it') + '<h3>',
               onOk: () => {
                 // 暂时解决对话框与后面提示对话框冲突的问题(否则一闪而过）
                 setTimeout(() => {
@@ -536,6 +546,7 @@
     .sample {
       align-items: stretch;
       &-input, &-output {
+        width: 50%;
         flex: 1 1 auto;
         display: flex;
         flex-direction: column;

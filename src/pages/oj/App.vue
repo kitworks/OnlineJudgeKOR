@@ -7,7 +7,7 @@
       </transition>
       <div class="footer">
         <p v-html="website.website_footer"></p>
-        <p>Copyright &copy; 2022 Kit Works Inc. All right reserved.</a>
+        <p>Copyright &copy; 2022 Kit Works Inc. All right reserved.
           <span v-if="version">&nbsp; Version: {{ version }}</span>
         </p>
       </div>
@@ -73,10 +73,19 @@
   }
 
 
+  @media screen and (max-width: 1200px) {
+  .content-app {
+    margin-top: 160px;
+    padding: 0 2%;
+  }
+}
+
+@media screen and (min-width: 1200px) {
   .content-app {
     margin-top: 80px;
     padding: 0 2%;
   }
+}
 
   .footer {
     margin-top: 20px;
