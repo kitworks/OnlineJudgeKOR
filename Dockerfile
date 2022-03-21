@@ -6,7 +6,7 @@ VOLUME ["/var/log/nginx/", "/data/avatar"]
 EXPOSE 80
 
 WORKDIR "/OJ_FE"
-COPY ../package.json .
+COPY ./package.json .
 RUN npm install
 COPY ../ .
 RUN npm run build:dll

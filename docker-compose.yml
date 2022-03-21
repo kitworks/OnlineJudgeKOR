@@ -53,7 +53,7 @@ services:
     # image: registry.cn-hangzhou.aliyuncs.com/onlinejudge/oj_backend
     build: 
       context: .
-      dockerfile: ./deploy/Dockerfile
+      dockerfile: ./Dockerfile
     container_name: oj-backend
     restart: always
     depends_on:
