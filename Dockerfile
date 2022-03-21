@@ -8,7 +8,7 @@ EXPOSE 80
 WORKDIR "/OJ_FE"
 COPY ./package.json .
 RUN npm install
-COPY ../ .
+COPY ./ .
 RUN npm run build:dll
 RUN npm run build
 
