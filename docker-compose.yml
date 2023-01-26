@@ -7,6 +7,14 @@ services:
     restart: always
     volumes:
       - ./data/redis:/data
+    deploy:
+      resources:
+        limits:
+          cpus: '0.01'
+          memory: 100M
+        reservations:
+          cpus: '0.001'
+          memory: 50M
   
   oj-postgres:
     image: postgres:10-alpine
@@ -20,6 +28,14 @@ services:
       - POSTGRES_PASSWORD=onlinejudge
     ports:
       - 5432:5432
+    deploy:
+      resources:
+        limits:
+          cpus: '0.4'
+          memory: 200M
+        reservations:
+          cpus: '0.04'
+          memory: 50M
 
   judge-server:
     image: registry.cn-hangzhou.aliyuncs.com/onlinejudge/judge_server
@@ -47,6 +63,14 @@ services:
     ports:
       - "0.0.0.0:8080:8080"
       - "0.0.0.0:8000:8000"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.3'
+          memory: 100M
+        reservations:
+          cpus: '0.0002'
+          memory: 50M
   
   oj-backend:
     # image: registry.cn-hangzhou.aliyuncs.com/onlinejudge/oj_backend
@@ -73,6 +97,14 @@ services:
     ports:
       - "0.0.0.0:80:8000"
       - "0.0.0.0:443:1443"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.2'
+          memory: 100M
+        reservations:
+          cpus: '0.0002'
+          memory: 50M
   # oj-backend:
   #   # image: registry.cn-hangzhou.aliyuncs.com/onlinejudge/oj_backend
   #   build: 
